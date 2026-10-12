@@ -1,10 +1,10 @@
 # atlalyzer [file analyzer]
 
-o objetivo inicial é criar uma cópia "barata e humilde" do virus total, mas visando ser uma ferramenta simples que consiga verificar arquivos, identificar seu tamanho e calcular seu hash sha-256. atualmente quero lançar uma versão/mvp por dia (ou ao mesmo tentar). futuramente, o projeto pode evoluir para um laboratório de análise de arquivos suspeitos.
+o objetivo inicial é criar uma cópia "barata e humilde" do virus total, mas visando ser uma ferramenta simples que consiga verificar arquivos, identificar seu tamanho e calcular seu hash sha-256. atualmente quero lançar uma versão por dia (ou ao menos tentar). futuramente, pretendo evoluir o projeto para um laboratório de análise de arquivos suspeitos.
 
 ## funcionalidades (v0)
 
-- verificaçao da existência do arquivo
+- verificação da existência do arquivo
 - verificação se o caminho informado aponta para um arquivo
 - identificação do tamanho em bytes
 - cálculo do hash sha-256
