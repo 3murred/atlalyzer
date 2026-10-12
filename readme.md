@@ -22,12 +22,12 @@ def analyze_file(file_path):
 
     # verifico se o caminho informado realmente existe antes de tentar acessar o arquivo
     if not path.exists():
-        print("erro: arquivo nao encontrado.")
+        print("erro: arquivo não encontrado.")
         return
 
     # verifico se o caminho informado aponta para um arquivo, e não para uma pasta
     if not path.is_file():
-        print("erro: o caminho informado nao e um arquivo.")
+        print("erro: o caminho informado não é um arquivo.")
         return
 
     # obtenho o tamanho do arquivo em bytes usando as informações do próprio arquivo
@@ -47,10 +47,10 @@ def analyze_file(file_path):
             sha256.update(chunk)
 
     # mostro os resultados da análise no terminal
-    print("\n=== murred file analyzer ===")
-    print(f"arquivo: {path.name}")
-    print(f"tamanho: {file_size} bytes")
-    print(f"sha-256: {sha256.hexdigest()}")
+    print("\n+++++ atLalyZer +++++")
+    print(f"Arquivo: {path.name}")
+    print(f"Tamanho: {file_size} bytes")
+    print(f"SHA256: {sha256.hexdigest()}")
 
 # esse bloco garante que a entrada do usuário só seja executada quando eu rodar esse arquivo diretamente
 if __name__ == "__main__":
