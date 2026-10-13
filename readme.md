@@ -10,7 +10,20 @@ o objetivo inicial é criar uma cópia "barata e humilde" do virus total, mas vi
 - cálculo do hash sha-256
 - leitura em blocos para evitar carregar o arquivo inteiro na memória
 
-## código
+## funcionalidades (v1)
+
+- analisador mais robusto
+- tratamento de erros, evitando que o programa quebre
+- validação dos arquivos mais segura
+- testes manuais feitos
+
+## funcionalidades (v2)
+
+- identificação de alguns formatos de arquivos através da assinatura binária
+- comparação da extensão com o tamanho do arquivo
+- alerta quando extensão e tamanho estão fora de um padrão
+
+## explicação do código v0 (não irei prosseguir com a explicação do código de cada versão)
 
 ```python
 from pathlib import Path  # biblioteca usada para trabalhar com caminhos de arquivos
