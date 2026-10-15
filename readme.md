@@ -57,6 +57,13 @@ python -m unittest -v
 - identificação de informações ausentes
 - preservação do arquivo original
 
+## funcionalidades v10 (v8 + v9 + v10)
+
+- consegui colocar um detector de anomalias
+- pontuação de risco
+- implementei conexão com um SQLite
+- possibilidade de análise em lote
+
 ## explicação do código v0 (não irei prosseguir com a explicação do código de cada versão)
 
 ```python
