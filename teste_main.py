@@ -97,5 +97,28 @@ class TestAtlalyzer(unittest.TestCase):
         self.assertEqual(saved_report["sha256"], report["sha256"])
         self.assertEqual(saved_report["detected_type"], "PDF")
 
+    def test_detect_invalid_zip(self):
+        invalid_file = self.test_dir / "arquivo.zip"
+        invalid_file.write_bytes("PK\x03\x04isso não é um zip válido".encode("utf-8"))
+        detected_type, extensions = detect_file_type(invalid_file)
+        self.assertEqual(detected_type, "ZIP inválido ou corrompido")
+        self.assertEqual(extensions, set())
+
+    def test_detect_valid_zip(self):
+        zip_file = self.test_dir / "arquivo.zip"
+        with zipfile.ZipFile(zip_file, "w") as archive:
+            archive.writestr("exemplo.txt", "arquivo de teste")
+        detected_type, extensions = detect_file_type(zip_file)
+        self.assertEqual(detected_type, "ZIP")
+        self.assertIn(".zip", extensions)
+
+    def test_file_metadata(self):
+        report = analyze_file(self.test_file)
+        self.assertIsNotNone(report)
+        self.assertIn("file_created_at", report)
+        self.assertIn("file_modified_at", report)
+        self.assertTrue(report["file_created_at"])
+        self.assertTrue(report["file_modified_at"])
+
 if __name__ == "__main__":
     unittest.main()

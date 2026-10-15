@@ -3,6 +3,7 @@ import hashlib
 import json
 from datetime import datetime, timezone
 import zipfile
+from PIL import Image, UnidentifiedImageError
 
 FILE_SIGNATURES = {b"\x89PNG\r\n\x1a\n": ("PNG", {".png"}), 
     b"\xff\xd8\xff": ("JPEG", {".jpg", ".jpeg"}), 
@@ -19,6 +20,9 @@ def detect_file_type(file_path):
     if header.startswith(b"PK\x03\x04"):
         try:
             with zipfile.ZipFile(file_path, "r") as archive:
+                corrupted_file = archive.testzip()
+                if corrupted_file is not None:
+                    return "ZIP corrompido", set()
                 names = set(archive.namelist())
             if ("word/document.xml" in names):
                 return "DOCX", {".docx"}
@@ -30,7 +34,7 @@ def detect_file_type(file_path):
                 return "JAR", {".jar"}
             return "ZIP", {".zip"}
         except zipfile.BadZipFile:
-            return("ZIP ou baseado em ZIP", {".zip", ".docx", ".xlsx", ".pptx", ".jar"})
+            return("ZIP inválido ou corrompido", set())
 
     for signature, file_info in FILE_SIGNATURES.items():
         if signature == b"PK\x03\x04":
@@ -52,7 +56,10 @@ def analyze_file(file_path):
         return None
     
     try:
-        file_size = path.stat().st_size
+        file_stat = path.stat()
+        file_size = file_stat.st_size
+        created_at = datetime.fromtimestamp(file_stat.st_ctime, tz=timezone.utc).isoformat()
+        modified_at = datetime.fromtimestamp(file_stat.st_mtime, tz=timezone.utc).isoformat()
         detected_type, expected_extensions = detect_file_type(path)
         extension = path.suffix.lower()
         sha256 = hashlib.sha256() 
@@ -72,6 +79,8 @@ def analyze_file(file_path):
                   "sha256": sha256.hexdigest(),
                   "detected_type": detected_type,
                   "extension": extension,
+                  "file_created_at": created_at,
+                  "file_modified_at": modified_at,
                   "extension_status": extension_status,
                   "extension_matches": extension_matches,
                   "analysis_timestamp": datetime.now(timezone.utc).isoformat(),
