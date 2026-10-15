@@ -44,6 +44,19 @@ o objetivo inicial é criar uma cópia "barata e humilde" do virus total, mas vi
 python -m unittest -v
 ```
 
+## funcionalidades (v5)
+
+- identifação de diferentes extensões de arquivos
+
+## funcionalidades (v7)
+
+- pulei a v6 (motivo óbvio)
+- deixei o projeto mais robusto e integro
+- tratamento de arquivos inválidos ou corrompidos
+- extração de metadados
+- identificação de informações ausentes
+- preservação do arquivo original
+
 ## explicação do código v0 (não irei prosseguir com a explicação do código de cada versão)
 
 ```python
