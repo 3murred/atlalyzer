@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 import zipfile
 from PIL import Image, UnidentifiedImageError
+from PIL.ExifTags import TAGS
 
 FILE_SIGNATURES = {b"\x89PNG\r\n\x1a\n": ("PNG", {".png"}), 
     b"\xff\xd8\xff": ("JPEG", {".jpg", ".jpeg"}), 
@@ -45,7 +46,7 @@ def detect_file_type(file_path):
     return "Formato desconhecido", set()
 
 def extract_image_metadata(file_path):
-    metadata = {"image_format": None, "image_width": None, "image_height": None, "exif": {},}
+    metadata = {"image_format": None, "image_width": None, "image_height": None, "image_validation": "invalid", "exif": {},}
     try:
         with Image.open(file_path) as image:
             metadata["image_format"] = image.format
@@ -53,19 +54,16 @@ def extract_image_metadata(file_path):
             metadata["image_height"] = image.height
             exif_data = image.getexif()
             for tag_id, value in exif_data.items():
-                tag_name = str(tag_id)
-                try:
-                    from PIL.ExifTags import TAGS
-                    tag_name = TAGS.get(tag_id, str(tag_id))
-                except (ImportError, AttributeError):
-                    pass
+                tag_name = TAGS.get(tag_id, str(tag_id))
                 if isinstance(value, bytes):
                     value = value.hex()
-                if isinstance(value, (str, int, float, bool)) or value is None:
-                    metadata["exif"][tag_name] = value
-                else:
-                    metadata["exif"][tag_name] = str(value)
-    except (UnidentifiedImageError, OSError, ValueError):
+                elif (not isinstance(value, (str, int, float, bool)) and value is not None): value = str(value)
+                metadata["exif"][tag_name] = value
+            with Image.open(file_path) as image:
+                image.verify()
+                metadata["image_validation"] = "valid"
+
+    except (UnidentifiedImageError, OSError, ValueError, SyntaxError):
         return None
     return metadata
 
@@ -87,14 +85,19 @@ def analyze_file(file_path):
         modified_at = datetime.fromtimestamp(file_stat.st_mtime, tz=timezone.utc).isoformat()
         detected_type, expected_extensions = detect_file_type(path)
         extension = path.suffix.lower()
+        image_metadata = extract_image_metadata(path)
         sha256 = hashlib.sha256() 
         with path.open("rb") as file:
             for chunk in iter(lambda: file.read(4096), b""):
                 sha256.update(chunk)
+        if image_metadata is not None:
+            actual_format = image_metadata["image_format"]
+            image_extensions = {"PNG": {".png"}, "JPEG": {".jpg", ".jpeg"}, "GIF": {".gif"},}
+            expected_extensions = image_extensions.get(actual_format, set())
 
         if expected_extensions:
             extension_matches = extension in expected_extensions
-            extension_status = ("compatível" if extension_matches else "incompatível")
+            extension_status = "compatível" if extension_matches else "incompatível"
         else:
             extension_matches = None
             extension_status = "Não é possível validar"
@@ -104,6 +107,7 @@ def analyze_file(file_path):
                   "sha256": sha256.hexdigest(),
                   "detected_type": detected_type,
                   "extension": extension,
+                  "image_metadata": image_metadata,
                   "file_created_at": created_at,
                   "file_modified_at": modified_at,
                   "extension_status": extension_status,
@@ -140,6 +144,12 @@ if __name__ == "__main__":
             print(f"SHA256: {report['sha256']}")
             print(f"Tipo: {report['detected_type']}")
             print(f"Extensão: {report['extension_status']}")
+            if report["image_metadata"] is not None:
+                metadata = report["image_metadata"]
+                print(f"Formato da imagem: "f"{metadata['iamge_format']}")
+                print(f"Dimensões: "f"{metadata['image_width']} x "f"{metadata['image_height']}")
+                print(f"Validação da imagem: "f"{metadata['image_validation']}")
+                print(f"Quantidade de tags EXIF: "f"{len(metadata['exif'])}")
             print(f"Relatório salvo em: {report_path}")
 
         except OSError as error:

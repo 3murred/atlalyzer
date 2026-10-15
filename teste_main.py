@@ -133,5 +133,49 @@ class TestAtlalyzer(unittest.TestCase):
         self.assertTrue(report["file_created_at"])
         self.assertTrue(report["file_modified_at"])
 
+    def test_image_metadata_in_report(self):
+        image_path = self.test_dir / "imagem_relatorio.png"
+        image = Image.new("RGB", (320, 240), color="blue")
+        image.save(image_path)
+        report = analyze_file(image_path)
+        self.assertIsNotNone(report)
+        self.assertEqual(report["image_metadata"]["image_format"], "PNG")
+        self.assertEqual(report["image_metadata"]["image_width"], 320)
+        self.assertEqual(report["image_metadata"]["image_height"], 240)
+
+    def test_image_metadata_saved_to_json(self):
+        image_path = self.test_dir / "image_json.png"
+
+        image = Image.new("RGB", (640, 480), color = "green")
+        image.save(image_path)
+        report = analyze_file(image_path)
+        report_path = save_report(report, self.test_dir)
+        with report_path.open("r", encoding="utf-8") as file:
+            saved_report = json.load(file)
+        metadata = saved_report["image_metadata"]
+        self.assertEqual(metadata["image_format"], "PNG")
+        self.assertEqual(report["image_metadata"]["image_width"], 640)
+        self.assertEqual(report["image_metadata"]["image_height"], 480)
+        self.assertIsInstance(metadata["exif"], dict)
+
+        def test_image_extension_mismatch(self):
+            image_path = self.test_dir / "imagem_falsa.jpg"
+            image = Image.new("RGB", (100,100), color="red")
+            image.save(image_path, format="PNG")
+            report = analyze_file(image_path)
+            self.assertIsNotNone(report)
+            self.assertEqual(report["detected_type"], "PNG")
+            self.assertEqual(report["extension"], "jpg")
+            self.assertFalse(report["extension_matches"])
+            self.assertEqual(report["extension_status"], "incompatível")
+    
+    def test_image_validation(self):
+        image_path = self.test_dir / "imagem_valida.png"
+        image = Image.new("RGB", (100, 100), color="red")
+        image.save(image_path)
+        metadata = extract_image_metadata(image_path)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata["image_validation"], "valid")
+
 if __name__ == "__main__":
     unittest.main()
