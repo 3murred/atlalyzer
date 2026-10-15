@@ -41,25 +41,52 @@ def analyze_file(file_path):
             for chunk in iter(lambda: file.read(4096), b""):
                 sha256.update(chunk)
 
-        print("\n+++++ ATLALYZER +++++")
-        print(f"Arquivo: {path.name}")
-        print(f"Tamanho: {file_size}b")
-        print(f"SHA256: {sha256.hexdigest()}")
-        print(f"Tipo: {detected_type}")
-
         if expected_extensions:
-            if extension in expected_extensions:
-                print("Extensão é compatível com o tipo detectado")
-            else:
-                print("Extensao não é compatível com o tipo detectado")
+            extension_matches = extension in expected_extensions
+            extension_status = ("compatível" if extension_matches else "incompatível")
         else:
-            print("Não foi possível validar a extensão do arquivo")
+            extension_matches = None
+            extension_status = "Não é possível validar"
+
+        report = {"file_name": path.name,
+                  "file_size_bytes": file_size,
+                  "sha256": sha256.hexdigest(),
+                  "detected_type": detected_type,
+                  "extension": extension,
+                  "extension_status": extension_status,
+                  "extension_matches": extension_matches,
+                  "analysis_timestamp": datetime.now(timezone.utc).isoformat(),
+                  "analysis_status": "completed",}
+        return report
 
     except PermissionError:
         print("Sem permissão para acessar o arquivo")
     except OSError as error:
         print(f"Erro ao acessar o arquivo {error}")
+    return None
+
+def save_report(report):
+    report_path = Path(f"{report['file_name']}.json")
+    with report_path.open("w", encoding="utf-8") as file:
+        json.dump(report, file, indent=4, ensure_ascii=False)
+    return report_path
 
 if __name__ == "__main__":
     file_path = input("Caminho do arquivo para analisar: " ).strip()
-    analyze_file(file_path)
+    report = analyze_file(file_path)
+
+    if report is not None:
+        try:
+            report_path = save_report(report)
+
+            print("\n+++++ ATLALYZER +++++")
+            print(f"Arquivo: {report['file_name']}")
+            print(f"Tamanho: {report['file_size_bytes']}b")
+            print(f"SHA256: {report['sha256']}")
+            print(f"Tipo: {report['detected_type']}")
+            print(f"Extensão: {report['extension_status']}")
+            print(f"Relatório salvo em: {report_path}")
+
+        except OSError as error:
+            print(f"Erro para salvar o relatório: {error}")
+        
