@@ -31,11 +31,18 @@ o objetivo inicial é criar uma cópia "barata e humilde" do virus total, mas vi
 
 ## funcionalidades (v4)
 
+- criei o teste_main.py
 - agora estou utilizando testes automatizados com unittest
 - verificação se o programa identifica corretamente os dados
 - validação com comparação do sha com hash pré-calculado
 - detecção de erros no processamento
 - testes no JSON
+
+## como realizar os testes (teste_main.py)
+
+```python
+python -m unittest -v
+```
 
 ## explicação do código v0 (não irei prosseguir com a explicação do código de cada versão)
 
