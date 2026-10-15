@@ -23,6 +23,12 @@ o objetivo inicial é criar uma cópia "barata e humilde" do virus total, mas vi
 - comparação da extensão com o tamanho do arquivo
 - alerta quando extensão e tamanho estão fora de um padrão
 
+## funcionalidades (v3)
+
+- deixei a saída mais estruturada, agora a saída é estruturada em um objeto ao invés de um texto no terminal
+- cada análise gera um JSON
+- a função separa dados e apresentação
+
 ## explicação do código v0 (não irei prosseguir com a explicação do código de cada versão)
 
 ```python
