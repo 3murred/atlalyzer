@@ -65,8 +65,10 @@ def analyze_file(file_path):
         print(f"Erro ao acessar o arquivo {error}")
     return None
 
-def save_report(report):
-    report_path = Path(f"{report['file_name']}.json")
+def save_report(report, output_dir = None):
+    destination = Path(output_dir) if output_dir else Path.cwd()
+    report_name = Path(report["file_name"]).with_suffix(".json").name
+    report_path = destination / report_name
     with report_path.open("w", encoding="utf-8") as file:
         json.dump(report, file, indent=4, ensure_ascii=False)
     return report_path
