@@ -1,14 +1,18 @@
 {
     "file_name": "teste.pdf",
+    "file_path": "C:\\Users\\David\\OneDrive\\Documentos\\teste.pdf",
     "file_size_bytes": 79471,
     "sha256": "699a6472e4df2acb890e6f3d0cd2da589a98330d0be65942f978f2a94adabb8a",
     "detected_type": "PDF",
     "extension": ".pdf",
-    "image_metadata": null,
-    "file_created_at": "2025-04-09T22:55:52.829023+00:00",
-    "file_modified_at": "2025-04-09T22:55:53.025713+00:00",
     "extension_status": "compatível",
     "extension_matches": true,
-    "analysis_timestamp": "2026-10-15T22:10:08.859155+00:00",
-    "analysis_status": "completed"
+    "file_created_at": "2025-04-09T22:55:52.829023+00:00",
+    "file_modified_at": "2025-04-09T22:55:53.025713+00:00",
+    "image_metadata": null,
+    "analysis_timestamp": "2026-10-15T22:24:25.022047+00:00",
+    "analysis_status": "completed",
+    "risk_score": 0,
+    "risk_level": "low",
+    "anomalies": []
 }

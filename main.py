@@ -9,35 +9,19 @@ from datetime import datetime, timezone
 from PIL import Image, UnidentifiedImageError
 from PIL.ExifTags import TAGS
 
-
-FILE_SIGNATURES = {
-    b"\x89PNG\r\n\x1a\n": ("PNG", {".png"}),
+FILE_SIGNATURES = {b"\x89PNG\r\n\x1a\n": ("PNG", {".png"}),
     b"\xff\xd8\xff": ("JPEG", {".jpg", ".jpeg"}),
     b"GIF87a": ("GIF", {".gif"}),
     b"GIF89a": ("GIF", {".gif"}),
     b"%PDF-": ("PDF", {".pdf"}),
-    b"PK\x03\x04": (
-        "ZIP ou baseado em ZIP",
-        {".zip", ".docx", ".xlsx", ".pptx", ".jar"},
-    ),
-    b"MZ": ("Executável Windows (PE)", {".exe", ".dll"}),
-}
+    b"PK\x03\x04": ("ZIP ou baseado em ZIP",{".zip", ".docx", ".xlsx", ".pptx", ".jar"},),
+    b"MZ": ("Executável Windows (PE)", {".exe", ".dll"}),}
 
-IMAGE_EXTENSIONS = {
-    "PNG": {".png"},
-    "JPEG": {".jpg", ".jpeg"},
-    "GIF": {".gif"},
-}
+IMAGE_EXTENSIONS = {"PNG": {".png"},"JPEG": {".jpg", ".jpeg"},"GIF": {".gif"},}
 
-EXECUTABLE_EXTENSIONS = {
-    ".exe", ".dll", ".bat", ".cmd", ".com",
-    ".scr", ".ps1", ".vbs", ".js", ".msi",
-}
+EXECUTABLE_EXTENSIONS = {".exe", ".dll", ".bat", ".cmd", ".com", ".scr", ".ps1", ".vbs", ".js", ".msi",}
 
-DOCUMENT_EXTENSIONS = {
-    ".pdf", ".doc", ".docx", ".xls", ".xlsx",
-    ".ppt", ".pptx", ".txt", ".jpg", ".jpeg", ".png",
-}
+DOCUMENT_EXTENSIONS = {".pdf", ".doc", ".docx", ".xls", ".xlsx",".ppt", ".pptx", ".txt", ".jpg", ".jpeg", ".png",}
 
 MAX_LARGE_FILE_BYTES = 100 * 1024 * 1024
 
@@ -353,11 +337,14 @@ def save_report(report, output_dir=None, filename=None):
     return report_path
 
 
+
 def init_database(db_path):
     database_path = Path(db_path)
     database_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with sqlite3.connect(database_path) as connection:
+    connection = sqlite3.connect(database_path)
+
+    try:
         connection.execute("""
             CREATE TABLE IF NOT EXISTS analyses (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -372,14 +359,22 @@ def init_database(db_path):
                 report_json TEXT NOT NULL
             )
         """)
+        connection.commit()
+    finally:
+        connection.close()
 
 
 def store_report(report, db_path):
     init_database(db_path)
 
-    with sqlite3.connect(db_path) as connection:
+    connection = sqlite3.connect(db_path)
+
+    try:
         cursor = connection.execute("""
-            INSERT INTO analyses (file_name,file_path,sha256,
+            INSERT INTO analyses (
+                file_name,
+                file_path,
+                sha256,
                 detected_type,
                 file_size_bytes,
                 risk_score,
@@ -400,7 +395,12 @@ def store_report(report, db_path):
             json.dumps(report, ensure_ascii=False),
         ))
 
+        connection.commit()
         return cursor.lastrowid
+
+    finally:
+        connection.close()
+
 
 
 def get_analysis_history(db_path, limit=20):
@@ -409,7 +409,9 @@ def get_analysis_history(db_path, limit=20):
 
     init_database(db_path)
 
-    with sqlite3.connect(db_path) as connection:
+    connection = sqlite3.connect(db_path)
+
+    try:
         connection.row_factory = sqlite3.Row
 
         rows = connection.execute("""
@@ -428,8 +430,10 @@ def get_analysis_history(db_path, limit=20):
             LIMIT ?
         """, (limit,)).fetchall()
 
-    return [dict(row) for row in rows]
+        return [dict(row) for row in rows]
 
+    finally:
+        connection.close()
 
 def analyze_batch(
     input_dir,
@@ -451,10 +455,7 @@ def analyze_batch(
     )
 
     if destination == source:
-        raise ValueError(
-            "A pasta de relatórios não pode ser a própria "
-            "pasta de entrada."
-        )
+        raise ValueError("A pasta de relatórios não pode ser a própria pasta de entrada.")
 
     destination.mkdir(parents=True, exist_ok=True)
 
@@ -480,7 +481,6 @@ def analyze_batch(
 
         resolved_path = path.resolve()
 
-        # Evita analisar os relatórios gerados pelo próprio lote.
         if destination in resolved_path.parents:
             continue
 

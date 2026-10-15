@@ -1,117 +1,81 @@
-# atlalyzer [file analyzer]
+# atlalyzer // file analyzer
 
-o objetivo inicial é criar uma cópia "barata e humilde" do virus total, mas visando ser uma ferramenta simples que consiga verificar arquivos, identificar seu tamanho e calcular seu hash sha-256. atualmente quero lançar uma versão por dia (ou ao menos tentar). futuramente, pretendo evoluir o projeto para um laboratório de análise de arquivos suspeitos.
+> uma cópia barata e humilde do virustotal, feita do zero, com python e vontade de aprender.
 
-## funcionalidades (v0)
+o **atlalyzer** começou com uma ideia simples: criar uma ferramenta capaz de analisar arquivos, identificar informações importantes e encontrar possíveis anomalias.
+
+a proposta inicial era fazer o básico bem feito. verificar se um arquivo existe, descobrir seu tamanho e calcular seu hash sha-256. mas a ideia é ir além.
+
+quero transformar esse projeto em um pequeno laboratório de análise de arquivos suspeitos, evoluindo uma versão de cada vez, aprendendo no processo e tentando lançar uma atualização por dia.
+
+sem pressa para parecer algo gigante. primeiro, fazer funcionar. depois, entender como funciona. por último, deixar melhor.
+
+## `roadmap.log`
+
+### v0 — the beginning
 
 - verificação da existência do arquivo
-- verificação se o caminho informado aponta para um arquivo
+- validação do caminho informado
 - identificação do tamanho em bytes
 - cálculo do hash sha-256
-- leitura em blocos para evitar carregar o arquivo inteiro na memória
+- leitura em blocos para evitar carregar arquivos inteiros na memória
 
-## funcionalidades (v1)
+### v1 — making it stronger
 
 - analisador mais robusto
-- tratamento de erros, evitando que o programa quebre
-- validação dos arquivos mais segura
-- testes manuais feitos
+- tratamento de erros para evitar encerramentos inesperados
+- validações mais seguras
+- primeiros testes manuais
 
-## funcionalidades (v2)
+### v2 — file signatures
 
-- identificação de alguns formatos de arquivos através da assinatura binária
-- comparação da extensão com o tamanho do arquivo
-- alerta quando extensão e tamanho estão fora de um padrão
+- identificação de formatos por assinatura binária
+- comparação entre a extensão e o formato detectado
+- identificação de possíveis incompatibilidades entre extensão e conteúdo
 
-## funcionalidades (v3)
+### v3 — structured output
 
-- deixei a saída mais estruturada, agora a saída é estruturada em um objeto ao invés de um texto no terminal
-- cada análise gera um JSON
-- a função separa dados e apresentação
+- resultados organizados em objetos python
+- geração de relatórios em json
+- separação entre lógica de análise e apresentação dos resultados
 
-## funcionalidades (v4)
+### v4 — automated testing
 
-- criei o teste_main.py
-- agora estou utilizando testes automatizados com unittest
-- verificação se o programa identifica corretamente os dados
-- validação com comparação do sha com hash pré-calculado
-- detecção de erros no processamento
-- testes no JSON
+- criação do `teste_main.py`
+- testes automatizados com `unittest`
+- validação dos dados identificados
+- comparação do sha-256 com hashes previamente calculados
+- testes de tratamento de erros e geração de relatórios json
 
-## como realizar os testes (teste_main.py)
+### v5 — extension awareness
 
-```python
-python -m unittest -v
-```
+- suporte à identificação de diferentes extensões
+- validação mais consistente entre extensão e formato detectado
 
-## funcionalidades (v5)
+### v7 — metadata extraction
 
-- identifação de diferentes extensões de arquivos
-
-## funcionalidades (v7)
-
-- pulei a v6 (motivo óbvio)
-- deixei o projeto mais robusto e integro
+- pulei a v6 pelo motivo óbvio
 - tratamento de arquivos inválidos ou corrompidos
-- extração de metadados
+- extração de metadados de imagens
 - identificação de informações ausentes
-- preservação do arquivo original
+- preservação dos arquivos originais durante a análise
 
-## funcionalidades v10 (v8 + v9 + v10)
+### v10 — anomaly detection & database
 
-- consegui colocar um detector de anomalias
-- pontuação de risco
-- implementei conexão com um SQLite
-- possibilidade de análise em lote
+aqui o projeto começou a ganhar mais cara de ferramenta de análise.
 
-## explicação do código v0 (não irei prosseguir com a explicação do código de cada versão)
+- detector de anomalias baseado em regras
+- pontuação e classificação de risco
+- integração com banco de dados sqlite
+- análise de múltiplos arquivos em lote
+- geração de relatórios individuais em json
+- histórico persistente de análises
+- **27 testes automatizados aprovados**
 
-```python
-from pathlib import Path  # biblioteca usada para trabalhar com caminhos de arquivos
-import hashlib  # biblioteca para calcular hashes
+## `run_tests.py`
 
-def analyze_file(file_path):
-    # crio um objeto path para trabalhar com o caminho do arquivo de forma mais simples
-    path = Path(file_path)
+para executar os testes automatizados, entre na pasta do projeto e rode:
 
-    # verifico se o caminho informado realmente existe antes de tentar acessar o arquivo
-    if not path.exists():
-        print("erro: arquivo não encontrado.")
-        return
-
-    # verifico se o caminho informado aponta para um arquivo, e não para uma pasta
-    if not path.is_file():
-        print("erro: o caminho informado não é um arquivo.")
-        return
-
-    # obtenho o tamanho do arquivo em bytes usando as informações do próprio arquivo
-    file_size = path.stat().st_size
-
-    # crio um objeto sha-256 que vai acumular os dados usados para calcular o hash
-    sha256 = hashlib.sha256()
-
-    # abro o arquivo em modo binário para ler os bytes originais, sem tentar interpretar o conteúdo como texto
-    with path.open("rb") as file:
-
-        # leio o arquivo em blocos de 4096 bytes para não precisar carregar tudo na memória de uma vez
-        # o iter continua lendo até o arquivo retornar b"", que indica que chegou ao final
-        for chunk in iter(lambda: file.read(4096), b""):
-
-            # adiciono cada bloco ao cálculo do hash, permitindo processar o arquivo aos poucos
-            sha256.update(chunk)
-
-    # mostro os resultados da análise no terminal
-    print("\n+++++ atLalyZer +++++")
-    print(f"Arquivo: {path.name}")
-    print(f"Tamanho: {file_size} bytes")
-    print(f"SHA256: {sha256.hexdigest()}")
-
-# esse bloco garante que a entrada do usuário só seja executada quando eu rodar esse arquivo diretamente
-if __name__ == "__main__":
-
-    # peço o caminho do arquivo e removo espaços extras no início e no final da entrada
-    file_path = input("caminho do arquivo para analisar: ").strip()
-
-    # chamo a função que realiza a análise do arquivo informado
-    analyze_file(file_path)
+```bash
+python -m unittest -v
 ```

@@ -1,0 +1,36 @@
+{
+    "file_name": "pipoca.jpg",
+    "file_path": "C:\\Users\\David\\Downloads\\pipoca.JPG",
+    "file_size_bytes": 1326181,
+    "sha256": "4f385be883f5d8af644fe4471b6a8ad021afa55d773ddf78e619b2229ccf96f7",
+    "detected_type": "JPEG",
+    "extension": ".jpg",
+    "extension_status": "compatível",
+    "extension_matches": true,
+    "file_created_at": "2025-07-23T01:12:02.568228+00:00",
+    "file_modified_at": "2025-07-23T01:12:02.758851+00:00",
+    "image_metadata": {
+        "image_format": "JPEG",
+        "image_width": 2048,
+        "image_height": 1536,
+        "image_validation": "valid",
+        "exif": {
+            "PrintImageMatching": "5072696e74494d003033303000000200020001000000010101000000",
+            "ResolutionUnit": 2,
+            "ExifOffset": 258,
+            "ImageDescription": "                               ",
+            "Make": "SONY",
+            "Model": "DSC-W120",
+            "Orientation": 1,
+            "DateTime": "2016:09:26 01:52:38",
+            "YCbCrPositioning": 2,
+            "XResolution": "72.0",
+            "YResolution": "72.0"
+        }
+    },
+    "analysis_timestamp": "2026-10-15T22:29:57.296547+00:00",
+    "analysis_status": "completed",
+    "risk_score": 0,
+    "risk_level": "low",
+    "anomalies": []
+}
