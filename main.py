@@ -1,5 +1,7 @@
 from pathlib import Path
 import hashlib
+import json
+from datetime import datetime, timezone
 
 FILE_SIGNATURES = {b"\x89PNG\r\n\x1a\n": ("PNG", {".png"}), 
     b"\xff\xd8\xff": ("JPEG", {".jpg", ".jpeg"}), 
@@ -12,19 +14,24 @@ FILE_SIGNATURES = {b"\x89PNG\r\n\x1a\n": ("PNG", {".png"}),
 def detect_file_type(file_path):
     with file_path.open("rb") as file:
         header = file.read(16)
+
     for signature, file_info in FILE_SIGNATURES.items():
         if header.startswith(signature):
             return file_info
+        
     return "Formato desconhecido", set()
 
 def analyze_file(file_path): 
     path = Path(file_path) 
+
     if not path.exists(): 
         print("Arquivo não existe") 
-        return
+        return None
+    
     if not path.is_file(): 
         print("Não é um arquivo") 
-        return
+        return None
+    
     try:
         file_size = path.stat().st_size
         detected_type, expected_extensions = detect_file_type(path)
