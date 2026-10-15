@@ -29,6 +29,14 @@ o objetivo inicial é criar uma cópia "barata e humilde" do virus total, mas vi
 - cada análise gera um JSON
 - a função separa dados e apresentação
 
+## funcionalidades (v4)
+
+- agora estou utilizando testes automatizados com unittest
+- verificação se o programa identifica corretamente os dados
+- validação com comparação do sha com hash pré-calculado
+- detecção de erros no processamento
+- testes no JSON
+
 ## explicação do código v0 (não irei prosseguir com a explicação do código de cada versão)
 
 ```python
