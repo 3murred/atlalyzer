@@ -4,7 +4,9 @@ import tempfile
 import unittest
 from pathlib import Path
 import zipfile
+from PIL import Image
 
+from main import extract_image_metadata
 from main import analyze_file, detect_file_type, save_report
 
 class TestAtlalyzer(unittest.TestCase):
@@ -15,6 +17,17 @@ class TestAtlalyzer(unittest.TestCase):
         self.test_file = self.test_dir / "documento.pdf"
         self.test_file.write_bytes(self.test_content)
         # return super().setUp()
+
+    def test_extract_image_metadata(self):
+        image_path = self.test_dir / "imagem_test.png"
+        image = Image.new("RGB", (100, 50), color = "red")
+        image.save(image_path)
+        metadata = extract_image_metadata(image_path)
+        self.assertIsNotNone(metadata) 
+        self.assertEqual(metadata["image_format"], "PNG")
+        self.assertEqual(metadata["image_width"], 100)
+        self.assertEqual(metadata["image_height"], 50)
+        self.assertIsInstance(metadata["exif"], dict)
 
     def tearDown(self):
         # return super().tearDown()

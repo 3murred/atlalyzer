@@ -44,6 +44,31 @@ def detect_file_type(file_path):
         
     return "Formato desconhecido", set()
 
+def extract_image_metadata(file_path):
+    metadata = {"image_format": None, "image_width": None, "image_height": None, "exif": {},}
+    try:
+        with Image.open(file_path) as image:
+            metadata["image_format"] = image.format
+            metadata["image_width"] = image.width
+            metadata["image_height"] = image.height
+            exif_data = image.getexif()
+            for tag_id, value in exif_data.items():
+                tag_name = str(tag_id)
+                try:
+                    from PIL.ExifTags import TAGS
+                    tag_name = TAGS.get(tag_id, str(tag_id))
+                except (ImportError, AttributeError):
+                    pass
+                if isinstance(value, bytes):
+                    value = value.hex()
+                if isinstance(value, (str, int, float, bool)) or value is None:
+                    metadata["exif"][tag_name] = value
+                else:
+                    metadata["exif"][tag_name] = str(value)
+    except (UnidentifiedImageError, OSError, ValueError):
+        return None
+    return metadata
+
 def analyze_file(file_path): 
     path = Path(file_path) 
 
