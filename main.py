@@ -2,6 +2,7 @@ from pathlib import Path
 import hashlib
 import json
 from datetime import datetime, timezone
+import zipfile
 
 FILE_SIGNATURES = {b"\x89PNG\r\n\x1a\n": ("PNG", {".png"}), 
     b"\xff\xd8\xff": ("JPEG", {".jpg", ".jpeg"}), 
@@ -15,7 +16,25 @@ def detect_file_type(file_path):
     with file_path.open("rb") as file:
         header = file.read(16)
 
+    if header.startswith(b"PK\x03\x04"):
+        try:
+            with zipfile.ZipFile(file_path, "r") as archive:
+                names = set(archive.namelist())
+            if ("word/document.xml" in names):
+                return "DOCX", {".docx"}
+            if ("xl/workbook.xml" in names):
+                return "XLSX", {".xlsx"}
+            if ("ppt/presentation.xml" in names):
+                return "PPTX", {".pptx"}
+            if "META-INF/MANIFEST.MF" in names:
+                return "JAR", {".jar"}
+            return "ZIP", {".zip"}
+        except zipfile.BadZipFile:
+            return("ZIP ou baseado em ZIP", {".zip", ".docx", ".xlsx", ".pptx", ".jar"})
+
     for signature, file_info in FILE_SIGNATURES.items():
+        if signature == b"PK\x03\x04":
+            continue
         if header.startswith(signature):
             return file_info
         
