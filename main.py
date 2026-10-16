@@ -273,6 +273,20 @@ def detect_anomalies(report):
     else:
         risk_level = "low"
 
+    archive_analysis = report.get("archive_analysis")
+    if archive_analysis:
+        if archive_analysis.get("error"):
+            anomalies.append("Não foi possível validar a estrutura do arquivo compactado")
+        if archive_analysis.get("unsafe_paths"):
+            anomalies.append("Arquivo compactado contém caminhos que são potencialmente inseguros")
+        if archive_analysis.get("suspicious_files"):
+            anomalies.append("Arquivo compactado contém caminhos que são potencialmente executáveis")
+        if archive_analysis.get("suspicious_files", 0) > 0:
+            anomalies.append("Arquivo compactado contém entradas criptografadas")
+        if archive_analysis.get("compression_ratio", 0) > 100:
+            anomalies.append("Arquivo compactado apresenta taxa de compressão muito elevada")
+
+
     return {
         "risk_score": risk_score,
         "risk_level": risk_level,
@@ -306,6 +320,8 @@ def analyze_file(file_path):
         ).isoformat()
 
         detected_type, expected_extensions = detect_file_type(path)
+        archive_analysis = analyze_archive_structure(file_path)
+        
         extension = path.suffix.lower()
         image_metadata = extract_image_metadata(path)
 
@@ -338,6 +354,7 @@ def analyze_file(file_path):
             "file_size_bytes": file_size,
             "sha256": sha256.hexdigest(),
             "detected_type": detected_type,
+            "archive_analysis": archive_analysis,
             "extension": extension,
             "extension_status": extension_status,
             "extension_matches": extension_matches,
