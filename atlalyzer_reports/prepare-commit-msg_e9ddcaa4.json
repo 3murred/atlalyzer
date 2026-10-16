@@ -1,0 +1,25 @@
+{
+    "file_name": "prepare-commit-msg.sample",
+    "file_path": "C:\\Users\\David\\OneDrive\\Desktop\\atlalyzer\\.git\\hooks\\prepare-commit-msg.sample",
+    "file_size_bytes": 1492,
+    "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619",
+    "detected_type": "Formato desconhecido",
+    "extension": ".sample",
+    "extension_status": "Não é possível validar",
+    "extension_matches": null,
+    "file_created_at": "2026-10-12T20:01:50.599310+00:00",
+    "file_modified_at": "2026-10-12T20:01:50.599310+00:00",
+    "image_metadata": null,
+    "analysis_timestamp": "2026-10-16T18:11:30.071878+00:00",
+    "analysis_status": "completed",
+    "risk_score": 10,
+    "risk_level": "low",
+    "anomalies": [
+        {
+            "code": "unknown_format",
+            "severity": "low",
+            "points": 10,
+            "description": "O formato não corresponde às assinaturas conhecidas."
+        }
+    ]
+}

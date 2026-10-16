@@ -1,0 +1,31 @@
+{
+    "file_name": "atlalyzer.log",
+    "file_path": "C:\\Users\\David\\OneDrive\\Desktop\\atlalyzer\\atlalyzer.log",
+    "file_size_bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "detected_type": "Formato desconhecido",
+    "extension": ".log",
+    "extension_status": "Não é possível validar",
+    "extension_matches": null,
+    "file_created_at": "2026-10-16T18:07:37.676193+00:00",
+    "file_modified_at": "2026-10-16T18:07:37.676193+00:00",
+    "image_metadata": null,
+    "analysis_timestamp": "2026-10-16T18:11:32.168694+00:00",
+    "analysis_status": "completed",
+    "risk_score": 20,
+    "risk_level": "medium",
+    "anomalies": [
+        {
+            "code": "empty_file",
+            "severity": "low",
+            "points": 10,
+            "description": "O arquivo está vazio."
+        },
+        {
+            "code": "unknown_format",
+            "severity": "low",
+            "points": 10,
+            "description": "O formato não corresponde às assinaturas conhecidas."
+        }
+    ]
+}

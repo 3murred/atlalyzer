@@ -20,7 +20,6 @@ from main import (
     store_report,
 )
 
-
 class TestAtlalyzer(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -323,7 +322,6 @@ class TestAtlalyzer(unittest.TestCase):
     def test_database_limit_validation(self):
         with self.assertRaises(ValueError):
             get_analysis_history(self.db_path, limit=0)
-
 
 if __name__ == "__main__":
     unittest.main()

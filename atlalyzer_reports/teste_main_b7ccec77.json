@@ -1,0 +1,25 @@
+{
+    "file_name": "teste_main.py",
+    "file_path": "C:\\Users\\David\\OneDrive\\Desktop\\atlalyzer\\teste_main.py",
+    "file_size_bytes": 11655,
+    "sha256": "b7ccec7748b305bc6c71a2f4ac8f80d309746b7f1a1cac49c06c562d0da161a2",
+    "detected_type": "Formato desconhecido",
+    "extension": ".py",
+    "extension_status": "Não é possível validar",
+    "extension_matches": null,
+    "file_created_at": "2026-10-15T12:07:01.178369+00:00",
+    "file_modified_at": "2026-10-16T17:23:18.393063+00:00",
+    "image_metadata": null,
+    "analysis_timestamp": "2026-10-16T18:11:32.244824+00:00",
+    "analysis_status": "completed",
+    "risk_score": 10,
+    "risk_level": "low",
+    "anomalies": [
+        {
+            "code": "unknown_format",
+            "severity": "low",
+            "points": 10,
+            "description": "O formato não corresponde às assinaturas conhecidas."
+        }
+    ]
+}

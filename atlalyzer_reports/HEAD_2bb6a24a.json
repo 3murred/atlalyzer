@@ -1,0 +1,25 @@
+{
+    "file_name": "HEAD",
+    "file_path": "C:\\Users\\David\\OneDrive\\Desktop\\atlalyzer\\.git\\refs\\remotes\\origin\\HEAD",
+    "file_size_bytes": 30,
+    "sha256": "2bb6a24aa0fc6c484100f5d51a29bbad841cd2c755f5d93faa204e5dbb4eb2b4",
+    "detected_type": "Formato desconhecido",
+    "extension": "",
+    "extension_status": "Não é possível validar",
+    "extension_matches": null,
+    "file_created_at": "2026-10-13T13:00:59.518808+00:00",
+    "file_modified_at": "2026-10-13T13:00:59.518808+00:00",
+    "image_metadata": null,
+    "analysis_timestamp": "2026-10-16T18:11:32.118969+00:00",
+    "analysis_status": "completed",
+    "risk_score": 10,
+    "risk_level": "low",
+    "anomalies": [
+        {
+            "code": "unknown_format",
+            "severity": "low",
+            "points": 10,
+            "description": "O formato não corresponde às assinaturas conhecidas."
+        }
+    ]
+}

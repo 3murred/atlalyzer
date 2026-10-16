@@ -1,0 +1,25 @@
+{
+    "file_name": "4abaaf4b65e423153893132e9349a076319928",
+    "file_path": "C:\\Users\\David\\OneDrive\\Desktop\\atlalyzer\\.git\\objects\\6e\\4abaaf4b65e423153893132e9349a076319928",
+    "file_size_bytes": 1289,
+    "sha256": "50bf627ad76a8cda1597444486bf733c02214593e571bd2421ea5947a0aa8c90",
+    "detected_type": "Formato desconhecido",
+    "extension": "",
+    "extension_status": "Não é possível validar",
+    "extension_matches": null,
+    "file_created_at": "2026-10-13T13:00:59.469353+00:00",
+    "file_modified_at": "2026-10-13T13:01:06.698517+00:00",
+    "image_metadata": null,
+    "analysis_timestamp": "2026-10-16T18:11:31.431062+00:00",
+    "analysis_status": "completed",
+    "risk_score": 10,
+    "risk_level": "low",
+    "anomalies": [
+        {
+            "code": "unknown_format",
+            "severity": "low",
+            "points": 10,
+            "description": "O formato não corresponde às assinaturas conhecidas."
+        }
+    ]
+}

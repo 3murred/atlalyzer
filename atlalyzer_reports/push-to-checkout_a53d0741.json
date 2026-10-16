@@ -1,0 +1,25 @@
+{
+    "file_name": "push-to-checkout.sample",
+    "file_path": "C:\\Users\\David\\OneDrive\\Desktop\\atlalyzer\\.git\\hooks\\push-to-checkout.sample",
+    "file_size_bytes": 2783,
+    "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f",
+    "detected_type": "Formato desconhecido",
+    "extension": ".sample",
+    "extension_status": "Não é possível validar",
+    "extension_matches": null,
+    "file_created_at": "2026-10-12T20:01:50.599310+00:00",
+    "file_modified_at": "2026-10-12T20:01:50.599310+00:00",
+    "image_metadata": null,
+    "analysis_timestamp": "2026-10-16T18:11:30.089404+00:00",
+    "analysis_status": "completed",
+    "risk_score": 10,
+    "risk_level": "low",
+    "anomalies": [
+        {
+            "code": "unknown_format",
+            "severity": "low",
+            "points": 10,
+            "description": "O formato não corresponde às assinaturas conhecidas."
+        }
+    ]
+}

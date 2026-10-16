@@ -5,6 +5,9 @@ import json
 import sqlite3
 import zipfile
 from datetime import datetime, timezone
+import argparse
+import logging
+import sys
 
 from PIL import Image, UnidentifiedImageError
 from PIL.ExifTags import TAGS
@@ -68,6 +71,56 @@ def detect_file_type(file_path):
 
     return "Formato desconhecido", set()
 
+def analyze_archive_structure(file_path):
+    """Analisa a estrutura interna de arquivos .zip sem a necessidade de extraí-los"""
+    path = Path(file_path)
+    if not zipfile.is_zipfile(path):
+        return None
+
+    suspicios_extensions = {".exe", ".dll", ".scr", ".bat", ".cmd", ".ps1", ".vbs", ".js", ".hta", ".msi",}
+    max_entries = 10_000
+    max_reported_items = 100
+    max_compression_ratio = 100
+
+    findings = []
+    total_uncompressed_size = 0
+    total_compressed_size = 0
+    encrypted_count = 0
+    suspicious_files = []
+    path_traversal_entries = []
+    entry_count = 0
+
+    try:
+        with zipfile.ZipFile(path, "r") as archive:
+            for entry in archive.infolist():
+                entry_count += 1
+                if entry_count > max_entries:
+                    findings.append(f"O arquivo compactado excede o limite de {max_entries} entradas")
+                    break
+                normalized_name = entry.filename.replace("\\", "/")
+                parts = normalized_name.split("/")
+                if (normalized_name.startswith("/") or any(part == ".." for part in parts) or (len(normalized_name) >= 2 and normalized_name[1] == ":")):
+                    if len(path_traversal_entries) < max_reported_items:
+                        path_traversal_entries.append(entry.filename)
+                suffix = Path(normalized_name).suffix.lower()
+                if (not entry.is_dir() and suffix in suspicios_extensions and len(suspicious_files) < max_reported_items):
+                    suspicious_files.append(entry.filename)
+                if entry.flag_bits & 0x1:
+                    encrypted_count += 1
+                total_uncompressed_size += entry.file_size
+                total_compressed_size += entry.compress_size
+            compression_ratio = (total_uncompressed_size / max(total_compressed_size, 1))
+            if compression_ratio > max_compression_ratio:
+                findings.append("Taxa de compressão muito elevada; possível arquivo compactado anormalmente")
+            if encrypted_count: 
+                findings.append(f"{encrypted_count} entrada(s) criptografada(s)")
+            if suspicious_files:
+                findings.append("Arquivos com extensões potencialmente executáveis ou interpretáveis foram encontrados")
+            if path_traversal_entries:
+                findings.append("Entradas com caminhos potencialmente inseguros foram encontradas")
+            return { "entry_count": entry_count, "total_uncompressed_size": total_uncompressed_size, "total_compressed_size": total_compressed_size, "compression_ratio": round(compression_ratio, 2), "encrypted_entries": encrypted_count, "suspicious_files": suspicious_files, "unsafe_paths": path_traversal_entries, "findings": findings,}
+    except (OSError, zipfile.BadZipFile, RuntimeError) as error:
+        return {"Error": f"Não foi possível analisar a estrutura: {error}", "Findings": ["estrutura do arquivo compactado ainda não foi validada"],}
 
 def extract_image_metadata(file_path):
     metadata = {
@@ -552,8 +605,8 @@ def print_report(report, report_path=None, database_id=None):
     if database_id is not None:
         print(f"Registro no SQLite: {database_id}")
 
-
-def main():
+# def main():
+def run_interactive():
     database_path = Path.cwd() / "atlalyzer.db"
 
     print("\n+++++ ATLALYZER v10 +++++")
@@ -627,6 +680,54 @@ def main():
     else:
         print("Opção inválida.")
 
+def main(argv=None):
+    parser = argparse.ArgumentParser(prog="atlalyzer", description="Analisador de arquivos e detector de anomalias",)
+    actions = parser.add_mutually_exclusive_group()
+    actions.add_argument("--file", metavar="CAMINHO", help="Analisa um arquivo individual",)
+    actions.add_argument("--dir", metavar="PASTA", help="Analisa os arquivos de uma pasta",)
+    actions.add_argument("--history", nargs="?", const = 20, type= int, metavar = "Limite", help="Consultar o histórico; padrão: 20 registros por vez",)
+    parser.add_argument("--recursive", action="store_true", help="Inclui as subpastas na análise em lote",)
+    actions.add_argument("--output", metavar="PASTA", help="Define a pasta de saída dos relatórios",)
+    actions.add_argument("--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR"], default="INFO", help="Define o nível de logging",)
+    parser.add_argument("--db", metavar="CAMINHO", help="Define o caminho do banco SQLite")
+    args = parser.parse_args(argv)
+    logging.basicConfig(level=getattr(logging, args.log_level), format="%(asctime)s | %(levelname)s | %(message)s", handlers=[logging.StreamHandler(), logging.FileHandler("atlalyzer.log", encoding="utf-8",),], force=True)
+    logger = logging.getLogger("atlalyzer")
+    if args.recursive and not args.dir:
+        parser.error("O --recursive exige o uso de --dir")
+    database_path = (Path(args.db).resolve() if args.db else Path.cwd() / "atlalyzer.db")
+    try:
+        if args.file:
+            report = analyze_file(args.file)
+            if report is None:
+                logger.error("A análise do arquivo não foi concluída. Tente novamente")
+                return 1
+            report_path = save_report(report, output_dir=args.output,)
+            database_id = store_report(report, database_path,)
+            print_report(report, report_path, database_id,)
+            logger.info("Análise individual foi concluída")
+            return 0
+        if args.dir:
+            results = analyze_batch(args.dir, output_dir=args.output, db_path=database_path, recursive=args.recursive,)
+            print(f"\nArquivos analisados: {len(results)}")
+            for result in results:
+                print(f"- {result['file_name']} | "f"Risco: {result['risk_level']} "f"({result['risk_score']}/100)")
+                print(f" Relatório: {result['report_path']}")
+            logger.info("Análise em lote concluída: %d arquivos", len(results),)
+            return 0
+        if args.history is not None:
+            history = get_analysis_history(database_path, args.history,)
+            if not history:
+                print("Nenhuma análise foi encontrada")
+                return 0
+            for item in history:
+                print(f"#{item['id']} | {item['file_name']} | "f"{item['detected_type']} | "f"risco: {item['risk_level']} "f"({item['risk_score']}/100) | "f"{item['analysis_timestamp']}")
+                return 0
+            run_interactive()
+            return 0
+    except (OSError, ValueError, sqlite3.Error) as error:
+        logger.exception("A operação não foi concluída: %s", error)
+        return 1
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

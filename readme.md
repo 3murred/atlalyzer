@@ -1,3 +1,32 @@
+<div align="center">
+
+```text
+          _____                _____                    _____            _____                    _____        _____                    _____                    _____                    _____
+         /\    \              /\    \                  /\    \          /\    \                  /\    \      |\    \                  /\    \                  /\    \                  /\    \
+        /::\    \            /::\    \                /::\____\        /::\    \                /::\____\     |:\____\                /::\    \                /::\    \                /::\    \
+       /::::\    \           \:::\    \              /:::/    /       /::::\    \              /:::/    /     |::|   |                \:::\    \              /::::\    \              /::::\    \
+      /::::::\    \           \:::\    \            /:::/    /       /::::::\    \            /:::/    /      |::|   |                 \:::\    \            /::::::\    \            /::::::\    \
+     /:::/\:::\    \           \:::\    \          /:::/    /       /:::/\:::\    \          /:::/    /       |::|   |                  \:::\    \          /:::/\:::\    \          /:::/\:::\    \
+    /:::/__\:::\    \           \:::\    \        /:::/    /       /:::/__\:::\    \        /:::/    /        |::|   |                   \:::\    \        /:::/__\:::\    \        /:::/__\:::\    \
+   /::::\   \:::\    \          /::::\    \      /:::/    /       /::::\   \:::\    \      /:::/    /         |::|   |                    \:::\    \      /::::\   \:::\    \      /::::\   \:::\    \
+  /::::::\   \:::\    \        /::::::\    \    /:::/    /       /::::::\   \:::\    \    /:::/    /          |::|___|______               \:::\    \    /::::::\   \:::\    \    /::::::\   \:::\    \
+ /:::/\:::\   \:::\    \      /:::/\:::\    \  /:::/    /       /:::/\:::\   \:::\    \  /:::/    /           /::::::::\    \               \:::\    \  /:::/\:::\   \:::\    \  /:::/\:::\   \:::\____\
+/:::/  \:::\   \:::\____\    /:::/  \:::\____\/:::/____/       /:::/  \:::\   \:::\____\/:::/____/           /::::::::::\____\_______________\:::\____\/:::/__\:::\   \:::\____\/:::/  \:::\   \:::|    |
+\::/    \:::\  /:::/    /   /:::/    \::/    /\:::\    \       \::/    \:::\  /:::/    /\:::\    \          /:::/~~~~/~~      \::::::::::::::::::/    /\:::\   \:::\   \::/    /\::/   |::::\  /:::|____|
+ \/____/ \:::\/:::/    /   /:::/    / \/____/  \:::\    \       \/____/ \:::\/:::/    /  \:::\    \        /:::/    /          \::::::::::::::::/____/  \:::\   \:::\   \/____/  \/____|:::::\/:::/    /
+          \::::::/    /   /:::/    /            \:::\    \               \::::::/    /    \:::\    \      /:::/    /            \:::\~~~~\~~~~~~         \:::\   \:::\    \            |:::::::::/    /
+           \::::/    /   /:::/    /              \:::\    \               \::::/    /      \:::\    \    /:::/    /              \:::\    \               \:::\   \:::\____\           |::|\::::/    /
+           /:::/    /    \::/    /                \:::\    \              /:::/    /        \:::\    \   \::/    /                \:::\    \               \:::\   \::/    /           |::| \::/____/
+          /:::/    /      \/____/                  \:::\    \            /:::/    /          \:::\    \   \/____/                  \:::\    \               \:::\   \/____/            |::|  ~|
+         /:::/    /                                 \:::\    \          /:::/    /            \:::\    \                            \:::\    \               \:::\    \                |::|   |
+        /:::/    /                                   \:::\____\        /:::/    /              \:::\____\                            \:::\____\               \:::\____\               \::|   |
+        \::/    /                                     \::/    /        \::/    /                \::/    /                             \::/    /                \::/    /                \:|   |
+         \/____/                                       \/____/          \/____/                  \/____/                               \/____/                  \/____/                  \|___|
+
+```
+
+</div>
+
 # atlalyzer // file analyzer
 
 > uma cópia barata e humilde do virustotal, feita do zero, com python e vontade de aprender.
@@ -9,6 +38,8 @@ a proposta inicial era fazer o básico bem feito. verificar se um arquivo existe
 quero transformar esse projeto em um pequeno laboratório de análise de arquivos suspeitos, evoluindo uma versão de cada vez, aprendendo no processo e tentando lançar uma atualização por dia.
 
 sem pressa para parecer algo gigante. primeiro, fazer funcionar. depois, entender como funciona. por último, deixar melhor.
+
+---
 
 ## `roadmap.log`
 
@@ -72,10 +103,40 @@ aqui o projeto começou a ganhar mais cara de ferramenta de análise.
 - histórico persistente de análises
 - **27 testes automatizados aprovados**
 
-## `run_tests.py`
+---
+
+## `how_to_test.md`
 
 para executar os testes automatizados, entre na pasta do projeto e rode:
 
 ```bash
 python -m unittest -v
 ```
+
+os testes ajudam a validar o comportamento das funções e a evitar que novas alterações quebrem o que já funciona.
+
+---
+
+## `what's next?`
+
+o atlalyzer ainda está em desenvolvimento. a ideia é continuar evoluindo a ferramenta aos poucos, adicionando recursos que façam sentido e entendendo cada parte antes de avançar.
+
+alguns dos objetivos para o futuro:
+
+- ampliar a identificação de formatos
+- melhorar a detecção de arquivos suspeitos
+- adicionar novas verificações e indicadores
+- evoluir o histórico e os relatórios
+- construir uma base para um laboratório de análise de arquivos
+
+---
+
+## `disclaimer.txt`
+
+o atlalyzer é um projeto educacional e experimental. a pontuação de risco é baseada em regras heurísticas e não confirma, por si só, que um arquivo é malicioso.
+
+**não é um substituto para o virustotal ou para soluções profissionais de segurança.** é um projeto em evolução, feito para aprender, testar ideias e construir algo útil de verdade.
+
+---
+
+_building it one version at a time. learning by breaking things, fixing them, and trying again._
