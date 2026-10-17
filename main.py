@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 import argparse
 import logging
 import sys
+try: import yara 
+except ImportError: yara = None
 
 from PIL import Image, UnidentifiedImageError
 from PIL.ExifTags import TAGS
@@ -122,6 +124,27 @@ def analyze_archive_structure(file_path):
     except (OSError, zipfile.BadZipFile, RuntimeError) as error:
         return {"Error": f"Não foi possível analisar a estrutura: {error}", "Findings": ["estrutura do arquivo compactado ainda não foi validada"],}
 
+def scan_with_yara(file_path, rules_dir="rules"):
+    """Analisa um arquivo com as regras YARA disponíveis"""
+    if yara is None:
+        return {"available": False, "matches": [], "error": "yara-python não foi instalado",}
+    rules_path = Path(rules_dir)
+    if not rules_path.is_absolute():
+        rules_path = Path(__file__).resolve().parent / rules_path
+    if not rules_path.is_dir():
+        return {"available": True, "matches": [], "error": "Diretório de regras YARA não foi encontrado",}
+    rule_files = sorted(rules_path.glob("*.yar"))
+    rule_files += sorted(rules_path.glob("*yara"))
+    if not rule_files:
+        return {"available": True, "matches": [], "error": "Nenhum arquivo de regras YARA encontrado",}
+    try:
+        compiled_rules = yara.compile(filepaths={f"rule_{index}": str(rule_file) for index, rule_file in enumerate(rule_files)})
+        matches = compiled_rules.match(str(file_path), timeout=10,)
+        return {"available": True, "matches": [{"rule": match.rule, "tags": list(match.tags), "meta": dict(match.meta),} for match in matches], "error": None,}
+    except (yara.Error, OSError, ValueError) as error:
+        return {"available": True, "matches": [], "error": f"Falha na análise YARA: {error}",}
+
+ 
 def extract_image_metadata(file_path):
     metadata = {
         "image_format": None,
@@ -261,10 +284,7 @@ def detect_anomalies(report):
             "possível extrair e validar seus metadados.",
         )
 
-    risk_score = min(
-        100,
-        sum(item["points"] for item in anomalies),
-    )
+    risk_score = min(100, sum(item["points"] for item in anomalies if isinstance(item, dict)),)
 
     if risk_score >= 50:
         risk_level = "high"
@@ -273,19 +293,66 @@ def detect_anomalies(report):
     else:
         risk_level = "low"
 
-    archive_analysis = report.get("archive_analysis")
-    if archive_analysis:
-        if archive_analysis.get("error"):
-            anomalies.append("Não foi possível validar a estrutura do arquivo compactado")
-        if archive_analysis.get("unsafe_paths"):
-            anomalies.append("Arquivo compactado contém caminhos que são potencialmente inseguros")
-        if archive_analysis.get("suspicious_files"):
-            anomalies.append("Arquivo compactado contém caminhos que são potencialmente executáveis")
-        if archive_analysis.get("suspicious_files", 0) > 0:
-            anomalies.append("Arquivo compactado contém entradas criptografadas")
-        if archive_analysis.get("compression_ratio", 0) > 100:
-            anomalies.append("Arquivo compactado apresenta taxa de compressão muito elevada")
+    archive_analysis = report.get("archive_analysis") or {}
 
+    if archive_analysis.get("error"):
+        add_anomaly(
+            "archive_validation_failed",
+            "medium",
+            20,
+            "Não foi possível validar a estrutura do arquivo compactado.",
+        )
+
+    if archive_analysis.get("unsafe_paths"):
+        add_anomaly(
+            "archive_unsafe_paths",
+            "high",
+            35,
+            "O arquivo compactado contém caminhos potencialmente inseguros.",
+        )
+
+    if archive_analysis.get("suspicious_files"):
+        add_anomaly(
+            "archive_suspicious_files",
+            "medium",
+            20,
+            "O arquivo compactado contém arquivos potencialmente executáveis.",
+        )
+
+    if archive_analysis.get("encrypted_entries", 0) > 0:
+        add_anomaly(
+            "archive_encrypted_entries",
+            "low",
+            10,
+            "O arquivo compactado contém entradas criptografadas.",
+        )
+
+    if archive_analysis.get("compression_ratio", 0) > 100:
+        add_anomaly(
+            "archive_high_compression",
+            "medium",
+            20,
+            "O arquivo compactado apresenta taxa de compressão muito elevada.",
+        )
+
+    yara_analysis = report.get("yara_analysis") or {}
+
+    severity_points = {
+        "low": 10,
+        "medium": 20,
+        "high": 35,
+        "critical": 50,
+    }
+
+    for match in yara_analysis.get("matches", []):
+        severity = match.get("meta", {}).get("severity", "medium")
+
+        add_anomaly(
+            "yara_match",
+            severity,
+            severity_points.get(severity.lower(), 20),
+            f"Regra YARA acionada: {match['rule']}",
+        )
 
     return {
         "risk_score": risk_score,
@@ -321,6 +388,7 @@ def analyze_file(file_path):
 
         detected_type, expected_extensions = detect_file_type(path)
         archive_analysis = analyze_archive_structure(file_path)
+        yara_analysis = scan_with_yara(file_path)
         
         extension = path.suffix.lower()
         image_metadata = extract_image_metadata(path)
@@ -355,6 +423,7 @@ def analyze_file(file_path):
             "sha256": sha256.hexdigest(),
             "detected_type": detected_type,
             "archive_analysis": archive_analysis,
+            "yara_analysis": yara_analysis,
             "extension": extension,
             "extension_status": extension_status,
             "extension_matches": extension_matches,
