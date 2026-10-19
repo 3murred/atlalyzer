@@ -6,7 +6,6 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
-
 from PIL import Image
 
 from main import (
@@ -14,6 +13,7 @@ from main import (
     analyze_file,
     detect_anomalies,
     detect_file_type,
+    extract_iocs,
     extract_image_metadata,
     get_analysis_history,
     save_report,
@@ -322,6 +322,25 @@ class TestAtlalyzer(unittest.TestCase):
     def test_database_limit_validation(self):
         with self.assertRaises(ValueError):
             get_analysis_history(self.db_path, limit=0)
+
+    def test_extract_iocs_from_file(self):
+        file_path = self.test_dir / "indicadores.txt"
+        file_path.write_text("Acesse https://murred.com/path e verifique o IP 7.7.7.7", encoding="utf-8",)
+        result = extract_iocs(file_path)
+        self.assertEqual(result["ipv4_addresses"], ["7.7.7.7"],)
+
+    def test_extract_iocs_ignores_ivalid_ip(self):
+        file_path= self.test_dir / "ip_invalido.txt"
+        file_path.write_text("IP inválido: 777.777.777.777", encoding="utf-8",)
+        result = extract_iocs(file_path)
+        self.assertEqual(result["ipv4_addresses"], [])
+
+    def test_extract_iocs_ignores_duplicates(self):
+        file_path = self.test_dir / "duplicados.txt"
+        file_path.write_text("https://murred.com https://murred.com 7.7.7.7 7.7.7.7", encoding="utf-8",)
+        result = extract_iocs(file_path)
+        self.assertEqual(result["urls"], ["https://murred.com"],)
+        self.assertEqual(result["ipv4_addresses"], ["7.7.7.7"],)
 
 if __name__ == "__main__":
     unittest.main()
