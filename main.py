@@ -10,6 +10,8 @@ import logging
 import sys
 try: import yara 
 except ImportError: yara = None
+import ipaddress
+import re
 
 from PIL import Image, UnidentifiedImageError
 from PIL.ExifTags import TAGS
@@ -144,6 +146,31 @@ def scan_with_yara(file_path, rules_dir="rules"):
     except (yara.Error, OSError, ValueError) as error:
         return {"available": True, "matches": [], "error": f"Falha na análise YARA: {error}",}
 
+def extract_iocs(file_path):
+    """Extrai possiveis indicadores de comprometimento de um arquivo"""
+    indicators = {"urls": [], "ipv4_addresses": [],}
+    try:
+        with open(file_path, "rb") as file:
+            content = file.read()
+        text = content.decode("utf-8", errors="ignore")
+    except OSError as error:
+        return {"urls": [], "ipv4_addresses": [], "error": str(error),}
+    url_pattern = r"https?://[^\s<>\"']+"
+    for url in re.findall(url_pattern, text, flags=re.IGNORECASE):
+        url = url.rstrip(".,;:!?)]}")
+        if url not in indicators["urls"]:
+            indicators["urls"].append(url)
+    ip_pattern = r"\b(?:\d{1,3}\.){3}\d{1,3}\b"
+    for candidate in re.findall(ip_pattern, text):
+        try:
+            address = ipaddress.IPv4Address(candidate)
+        except ipaddress.AddressValueError:
+            continue
+        normalized_ip = str(address)
+        if normalized_ip not in indicators["ipv4_addresses"]:
+            indicators["ipv4_addresses"].append(normalized_ip)
+    return indicators
+        
  
 def extract_image_metadata(file_path):
     metadata = {
@@ -389,7 +416,8 @@ def analyze_file(file_path):
         detected_type, expected_extensions = detect_file_type(path)
         archive_analysis = analyze_archive_structure(file_path)
         yara_analysis = scan_with_yara(file_path)
-        
+        ioc_analysis = extract_iocs(file_path)
+
         extension = path.suffix.lower()
         image_metadata = extract_image_metadata(path)
 
@@ -424,6 +452,7 @@ def analyze_file(file_path):
             "detected_type": detected_type,
             "archive_analysis": archive_analysis,
             "yara_analysis": yara_analysis,
+            "ioc_analysis": ioc_analysis,
             "extension": extension,
             "extension_status": extension_status,
             "extension_matches": extension_matches,
