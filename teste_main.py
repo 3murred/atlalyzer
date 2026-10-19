@@ -18,6 +18,7 @@ from main import (
     get_analysis_history,
     save_report,
     store_report,
+    classify_ipv4,
 )
 
 class TestAtlalyzer(unittest.TestCase):
@@ -342,5 +343,13 @@ class TestAtlalyzer(unittest.TestCase):
         self.assertEqual(result["urls"], ["https://murred.com"],)
         self.assertEqual(result["ipv4_addresses"], ["7.7.7.7"],)
 
+    def test_classify_ipv4_categories(self):
+        test_cases = {"192.168.1.10": "private", "127.0.0.1": "loopback", "8.8.8.8": "public", "240.0.0.1": "reserved",}
+        for address, expected in test_cases.items():
+            with self.subTest(address=address):
+                self.assertEqual(classify_ipv4(address), expected,)
+
+    def test_classify_invalid_ipv4(self):
+        self.assertEqual(classify_ipv4("999.999.999.999"), "invalid")
 if __name__ == "__main__":
     unittest.main()

@@ -169,8 +169,35 @@ def extract_iocs(file_path):
         normalized_ip = str(address)
         if normalized_ip not in indicators["ipv4_addresses"]:
             indicators["ipv4_addresses"].append(normalized_ip)
+        if "ipv4_classification" not in indicators:
+            indicators["ipv4_classification"] = {}
+        indicators["ipv4_classification"][normalized_ip] = classify_ipv4(normalized_ip)
+
     return indicators
-        
+
+def classify_ipv4(address):
+    """Classifica um endereço IPv4 por suas características de rede"""
+    try:
+        ip = ipaddress.IPv4Address(address)
+    except ipaddress.AddressValueError:
+        return "invalid"
+
+    if ip.is_loopback:
+        return "loopback"
+    if ip in ipaddress.ip_network("10.0.0.0/8"):
+        return "private"
+
+    if ip in ipaddress.ip_network("172.16.0.0/12"):
+            return "private"
+
+    if ip in ipaddress.ip_network("192.168.0.0/16"):
+            return "private"
+    
+    if ip.is_reserved:
+        return "reserved"
+    if ip.is_global:
+        return "public"
+    return "other"       
  
 def extract_image_metadata(file_path):
     metadata = {
